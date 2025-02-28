@@ -29,7 +29,7 @@ namespace BulkyWebRazor_Temp.Pages.Categories
             {
                 _db.Categories.Update(Category); // what we doing is added category obj to categories table
                 _db.SaveChanges(); // then save it to db.
-
+                TempData["success"] = "Category Edit Successfully";
                 return RedirectToPage("Index"); // go to index is meaning excecute to render list category
             }
             return Page();
