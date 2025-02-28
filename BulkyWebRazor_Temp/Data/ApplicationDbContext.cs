@@ -1,4 +1,4 @@
-﻿using BulkyWebRazor_Temp.Model;
+﻿using BulkyWebRazor_Temp.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BulkyWebRazor_Temp.Data
