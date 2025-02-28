@@ -82,8 +82,37 @@ namespace BulkyWeb.Controllers
                 _db.SaveChanges(); // then save it to db.
                 return RedirectToAction("Index"); // go to index is meaning excecute to render list category
             }
-
             return View();
+        }
+
+        // Delete controller
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            Category? categoryFromDb = _db.Categories.Find(id);
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(categoryFromDb);
+        }
+
+        [HttpPost, ActionName("Delete")] // for update
+        public IActionResult DeletePost(int? id)
+        {
+            Category? obj = _db.Categories.Find(id);
+            if (obj == null)
+            {
+            return NotFound();
+            }
+                _db.Categories.Remove(obj); 
+                _db.SaveChanges(); // then save it to db.
+                return RedirectToAction("Index"); // go to index is meaning excecute to render list category
         }
     }
 }
