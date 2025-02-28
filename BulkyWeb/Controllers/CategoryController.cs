@@ -33,7 +33,7 @@ namespace BulkyWeb.Controllers
 
             if(obj.Name != null && obj.Name.ToLower() == "test") // in case we can accept input test
             {
-                ModelState.AddModelError("", "test is invalid value");
+                ModelState.AddModelError("name", "test is invalid value");
             }
 
             if(ModelState.IsValid)
