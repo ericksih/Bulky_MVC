@@ -22,7 +22,7 @@ namespace Bulky.Data
                 new Category { Id = 3, Name = "History", DisplayOrder = 4 }
                 );
 
-            modelBuilder.Entity<Category>().HasData(
+            modelBuilder.Entity<Product>().HasData(
                 new Product
                 {
                     Id = 1,
