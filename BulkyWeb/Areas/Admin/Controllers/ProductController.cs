@@ -50,40 +50,72 @@ namespace BulkyWeb.Areas.Admin.Controllers
             }
         }
 
+     
         [HttpPost]
         public IActionResult Upsert(ProductVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string productPath = Path.Combine(wwwRootPath, "images", "product");
+
+                // Ensure the product directory exists
+                if (!Directory.Exists(productPath))
+                {
+                    Directory.CreateDirectory(productPath);
+                }
+
                 if (file != null)
                 {
+                    // Generate a unique file name
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath + @"\images\product");
+                    string fullPath = Path.Combine(productPath, fileName);
 
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    // Delete the old image only if a new one is uploaded
+                    if (!string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    {
+                        string oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+
+                    // Save the new file
+                    using (var fileStream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(fileStream);
                     }
+
+                    // Update ImageUrl with the new file path
                     productVM.Product.ImageUrl = @"\images\product\" + fileName;
                 }
 
-                _unitOfWork.Product.Add(productVM.Product);
-                _unitOfWork.Save(); // then save it to db.
-                TempData["success"] = "Product created Successfully";
+                // Check if this is a new product or an update
+                if (productVM.Product.Id == 0)
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                }
+
+                _unitOfWork.Save(); // Save to DB
+                TempData["success"] = "Product saved successfully";
                 return RedirectToAction("Index");
             }
-            else
-            {
-                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-                {
-                    Text = u.Name,
-                    Value = u.Id.ToString()
-                });
 
-                return View(productVM);
-            }
+            // If ModelState is invalid, reload categories and return the view
+            productVM.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString()
+            });
+
+            return View(productVM);
         }
+
 
         // Delete controller
         public IActionResult Delete(int? id)
