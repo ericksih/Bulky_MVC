@@ -100,7 +100,18 @@
                 </div>
 
                 <div class="col-2">
+                    @* <img src="@Model.Product.ImageUrl" width="100%" style="border-radius:5px; border:1px solid red" /> *@
+                    
+
+                    @if(Model.Product.ImageUrl!=null || Model.Product.ImageUrl == "")
+                    {
+                    <p>No image</p>
+                    }
+                    else
+                    {
                     <img src="@Model.Product.ImageUrl" width="100%" style="border-radius:5px; border:1px solid red" />
+                    }
+                    
                 </div>
             </div>
 
