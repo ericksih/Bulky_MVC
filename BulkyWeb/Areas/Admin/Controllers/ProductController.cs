@@ -12,10 +12,12 @@ namespace BulkyWeb.Areas.Admin.Controllers
     {
 
         private readonly IUnitOfWork _unitOfWork;
-        public ProductController(IUnitOfWork unitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment; // inject webhostenvironment to get the root path of the project which is wwwroot
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
 
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
@@ -53,13 +55,25 @@ namespace BulkyWeb.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (file != null)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string productPath = Path.Combine(wwwRootPath + @"\images\product");
+
+                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+                    productVM.Product.ImageUrl = @"\images\product\" + fileName;
+                }
+
                 _unitOfWork.Product.Add(productVM.Product);
                 _unitOfWork.Save(); // then save it to db.
                 TempData["success"] = "Product created Successfully";
                 return RedirectToAction("Index");
             }
             else
-
             {
                 productVM.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
                 {
@@ -69,9 +83,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
                 return View(productVM);
             }
-
         }
-
 
         // Delete controller
         public IActionResult Delete(int? id)
