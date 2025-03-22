@@ -27,7 +27,7 @@ function loadDataTable() {
                         </div>
                     `;
                 },
-                orderable: false
+                orderable: false // false
             }
         ]
     });
