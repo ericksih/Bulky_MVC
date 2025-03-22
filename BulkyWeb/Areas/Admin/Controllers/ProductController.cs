@@ -21,7 +21,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            List<Product> objProductList = _unitOfWork.Product.GetAll().ToList();
+            List<Product> objProductList = _unitOfWork.Product.GetAll(includeProperties:"Category").ToList();
             return View(objProductList);
         }
 
@@ -117,23 +117,6 @@ namespace BulkyWeb.Areas.Admin.Controllers
         }
 
 
-        // Delete controller
-        public IActionResult Delete(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-
-            Product? productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-
-            return View(productFromDb);
-        }
-
         [HttpPost, ActionName("Delete")] // for update
         public IActionResult DeletePost(int? id)
         {
@@ -149,5 +132,43 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
             return RedirectToAction("Index"); // go to index is meaning excecute to render list product
         }
+
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Product> objProductList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+
+            return Json(new { data = objProductList });
+        }
+
+     
+        public IActionResult Delete(int? id)
+        {
+            var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
+
+            if (productToBeDeleted == null)
+            {
+                return Json(new { success = false, message = "Error while deleting" });
+            }
+
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+            // Delete the image
+            string imagePath = Path.Combine(wwwRootPath, productToBeDeleted.ImageUrl.TrimStart('\\'));
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+
+            _unitOfWork.Product.Remove(productToBeDeleted);
+            _unitOfWork.Save();
+
+            return Json(new { success = true, message = "Delete successful" });
+
+
+        }
+
+        #endregion
     }
 }
