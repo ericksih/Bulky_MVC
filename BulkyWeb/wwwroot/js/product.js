@@ -1,4 +1,6 @@
 ﻿
+var dataTale;
+
 $(document).ready(function () {
     loadDataTable();
 });
@@ -27,7 +29,7 @@ function loadDataTable() {
                         </div>
                     `;
                 },
-                orderable: false // false
+                orderable: false
             }
         ]
     });
@@ -44,13 +46,13 @@ function Delete(url) {
         confirmButtonText: "Yes, delete it!"
     }).then((result) => {
         if (result.isConfirmed) {
-            Swal.fire({
+               $.ajax({
                 url: url,
                 type: "DELETE",
                 success: function (data) {
                     if (data.success) {
-                        toastr.success(data.message);
                         dataTable.ajax.reload();
+                        toastr.success(data.message);
                     } else {
                         toastr.error(data.message);
                     }

@@ -142,7 +142,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
             return Json(new { data = objProductList });
         }
 
-     
+        [HttpDelete]
         public IActionResult Delete(int? id)
         {
             var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
@@ -154,12 +154,17 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
             string wwwRootPath = _webHostEnvironment.WebRootPath;
 
-            // Delete the image
-            string imagePath = Path.Combine(wwwRootPath, productToBeDeleted.ImageUrl.TrimStart('\\'));
-            if (System.IO.File.Exists(imagePath))
+            if (!string.IsNullOrWhiteSpace(productToBeDeleted.ImageUrl))
             {
-                System.IO.File.Delete(imagePath);
+                string imagePath = Path.Combine(wwwRootPath, productToBeDeleted.ImageUrl.TrimStart('\\'));
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
             }
+
+
 
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
